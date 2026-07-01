@@ -15,6 +15,7 @@
             --accent: #0ea5e9;
             --bg: #f1f5f9;
             --warning: #f59e0b;
+            --success: #10b981;
         }
 
         body {
@@ -39,19 +40,10 @@
 
         .nav-logo { font-weight: 800; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; gap: 10px; }
         
-        /* Container tombol navigasi agar rapi di mobile */
         .nav-links { display: flex; gap: 5px; }
         .nav-links button { 
-            background: transparent; 
-            border: none; 
-            color: #cbd5e1; 
-            padding: 8px 12px; 
-            cursor: pointer; 
-            font-weight: 600; 
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            background: transparent; border: none; color: #cbd5e1; padding: 8px 12px; 
+            cursor: pointer; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 6px;
         }
         .nav-links button:hover { color: white; background: rgba(255,255,255,0.1); border-radius: 6px; }
 
@@ -69,51 +61,31 @@
         .card-body { padding: 12px; }
         .badge { background: #e0f2fe; color: var(--accent); padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: inline-block; }
 
-        /* Form */
-        .form-group { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; }
+        /* Form & Admin */
+        .form-group { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
         input, textarea, select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
         .btn-main { background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
         
         /* Lokasi Box */
         .location-box { background: #fffbeb; border-left: 4px solid var(--warning); padding: 15px; margin-top: 15px; border-radius: 0 8px 8px 0; }
-        .status-info { color: var(--warning); font-weight: 700; font-style: italic; }
-
-        /* MODAL DENAH */
+        
+        /* Modal Denah */
         .modal { 
-            display: none; 
-            position: fixed; 
-            z-index: 2000; 
-            left: 0; top: 0; 
-            width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.8); 
-            align-items: center; 
-            justify-content: center; 
-            backdrop-filter: blur(5px);
+            display: none; position: fixed; z-index: 2000; left: 0; top: 0; 
+            width: 100%; height: 100%; background: rgba(0,0,0,0.8); 
+            align-items: center; justify-content: center; backdrop-filter: blur(5px);
         }
         .modal-content { 
-            background: white; 
-            padding: 25px; 
-            border-radius: 15px; 
-            max-width: 90%; 
-            max-height: 90%; 
-            position: relative; 
-            text-align: center; 
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+            background: white; padding: 25px; border-radius: 15px; max-width: 90%; 
+            max-height: 90%; position: relative; text-align: center; overflow: auto;
         }
-        .modal-content img { 
-            max-width: 100%; 
-            height: auto; 
-            border-radius: 8px; 
-            border: 1px solid #ddd;
-            margin-top: 10px;
-        }
+        .modal-content img { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #ddd; margin-top: 10px; }
         .close-modal { position: absolute; top: 10px; right: 15px; font-size: 28px; cursor: pointer; color: #64748b; }
 
         @media (max-width: 600px) {
-            nav { flex-direction: column; gap: 15px; padding: 1rem; }
+            nav { flex-direction: column; gap: 10px; padding: 1rem; }
             #result { grid-template-columns: 1fr 1fr; gap: 10px; }
-            .card img { height: 200px; }
-            .nav-links button { font-size: 0.8rem; padding: 6px 8px; }
+            .card img { height: 180px; }
         }
     </style>
 </head>
@@ -125,7 +97,6 @@
     </div>
     <div class="nav-links">
         <button onclick="showPage('searchPage')"><i class="fas fa-search"></i> Cari Novel</button>
-        <!-- TOMBOL DENAH DI ANTARA CARI & ADMIN -->
         <button onclick="openMap()"><i class="fas fa-map"></i> Denah Lokasi</button>
         <button onclick="showPage('adminPage')"><i class="fas fa-user-lock"></i> Admin</button>
     </div>
@@ -174,10 +145,11 @@
 
         <div id="adminPanel" style="display:none;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h2>Input Koleksi Novel</h2>
+                <h2>Panel Admin Pustakawan</h2>
                 <button onclick="logout()" style="background:#ef4444; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">Logout</button>
             </div>
             
+            <!-- FORM INPUT NOVEL -->
             <div class="form-group">
                 <h4 id="formTitle">Tambah Data Novel</h4>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
@@ -195,22 +167,29 @@
                 <button class="btn-main" id="btnSave" onclick="saveData()">Simpan Data Novel</button>
                 <button id="btnCancel" onclick="resetForm()" style="display:none; color:gray; border:none; background:none; cursor:pointer; margin-left:10px;">Batal</button>
             </div>
+
+            <!-- FORM UPDATE DENAH -->
+            <div class="form-group" style="border: 2px dashed var(--accent);">
+                <h4><i class="fas fa-map-marked-alt"></i> Update Denah Perpustakaan</h4>
+                <p style="font-size:0.8rem;">Upload gambar denah baru untuk menu navigasi utama.</p>
+                <input type="file" id="mapUpload" accept="image/*">
+                <img id="mapPreview" style="max-height:150px; display:none; margin:10px 0; border-radius:8px;">
+                <br>
+                <button class="btn-main" id="btnSaveMap" onclick="saveMapData()" style="background: var(--success);">Simpan Denah Terbaru</button>
+            </div>
+
             <div id="adminList" style="margin-top:20px;"></div>
         </div>
     </div>
 </div>
 
-<!-- MODAL DENAH (Pop-up) -->
+<!-- MODAL DENAH -->
 <div id="mapModal" class="modal">
     <div class="modal-content">
         <span class="close-modal" onclick="closeMap()">&times;</span>
-        <h3 style="margin:0 0 10px 0;"><i class="fas fa-map-marked-alt"></i> Denah Ruang Koleksi</h3>
-        <p style="font-size:0.85rem; color:#64748b; margin-bottom:15px;">Gunakan denah ini untuk mempermudah mencari posisi rak di perpustakaan.</p>
-        
-        <!-- TEMPAT GAMBAR DENAH ANDA -->
-        <!-- Ganti denah.jpg dengan file denah Anda nanti -->
-        <img src="denah.jpg" onerror="this.src='https://via.placeholder.com/800x500?text=Gambar+Denah+Sedang+Disiapkan'" alt="Denah Perpustakaan">
-        
+        <h3 style="margin:0;"><i class="fas fa-map-marked-alt"></i> Denah Ruang Koleksi</h3>
+        <p style="font-size:0.85rem; color:#64748b; margin-bottom:15px;">Gunakan denah ini untuk mempermudah mencari posisi rak.</p>
+        <img id="mainMapImg" src="" onerror="this.src='https://via.placeholder.com/800x500?text=Denah+Belum+Diunggah'" alt="Denah Lokasi">
         <div style="margin-top:20px;">
             <button class="btn-main" style="background:#64748b;" onclick="closeMap()">Tutup</button>
         </div>
@@ -237,17 +216,52 @@
     let books = [];
     let editId = null;
 
-    // FUNGSI MODAL DENAH
+    // --- MODAL & NAVIGATION ---
+    window.showPage = (id) => {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(id === 'searchPage') updateGenreDropdown();
+        window.scrollTo(0,0);
+    };
+
     window.openMap = () => { document.getElementById('mapModal').style.display = 'flex'; };
     window.closeMap = () => { document.getElementById('mapModal').style.display = 'none'; };
 
-    // Klik di luar kotak denah untuk menutup
-    window.onclick = function(event) {
-        const modal = document.getElementById('mapModal');
-        if (event.target == modal) { modal.style.display = "none"; }
-    }
+    // --- LOGIKA UPDATE DENAH (SAMA SEPERTI COVER) ---
+    document.getElementById('mapUpload').onchange = (e) => {
+        if(!e.target.files[0]) return;
+        const reader = new FileReader();
+        reader.onload = async () => {
+            const compressed = await compressImage(reader.result);
+            const preview = document.getElementById('mapPreview');
+            preview.src = compressed;
+            preview.style.display = "block";
+            preview.dataset.img = compressed;
+        };
+        reader.readAsDataURL(e.target.files[0]);
+    };
 
-    // LOGIN
+    window.saveMapData = () => {
+        const imgData = document.getElementById('mapPreview').dataset.img;
+        if(!imgData) return alert("Pilih gambar denah terlebih dahulu!");
+
+        const btn = document.getElementById('btnSaveMap');
+        btn.disabled = true; btn.innerText = "Menyimpan...";
+
+        set(ref(db, 'settings/map'), imgData).then(() => {
+            alert("Denah berhasil diperbarui!");
+            document.getElementById('mapPreview').style.display = "none";
+            document.getElementById('mapUpload').value = "";
+        }).finally(() => { btn.disabled = false; btn.innerText = "Simpan Denah Terbaru"; });
+    };
+
+    // Ambil denah secara realtime
+    onValue(ref(db, 'settings/map'), (snapshot) => {
+        const mapData = snapshot.val();
+        if(mapData) document.getElementById('mainMapImg').src = mapData;
+    });
+
+    // --- LOGIN & AUTH ---
     window.login = () => {
         if(document.getElementById('passInput').value === "admindispersip") {
             sessionStorage.setItem("isLoggedIn", "true");
@@ -266,30 +280,25 @@
         document.getElementById('adminPanel').style.display = isAuth ? "block" : "none";
     }
 
-    window.showPage = (id) => {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        if(id === 'searchPage') updateGenreDropdown();
-    };
-
-    // COMPRESS GAMBAR COVER
+    // --- COMPRESS IMAGE ---
     async function compressImage(base64) {
         return new Promise((resolve) => {
             const img = new Image();
             img.src = base64;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                const width = 250;
+                const width = 800; // Resolusi denah lebih besar sedikit
                 const scale = width / img.width;
                 canvas.width = width;
                 canvas.height = img.height * scale;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                resolve(canvas.toDataURL('image/jpeg', 0.6));
+                resolve(canvas.toDataURL('image/jpeg', 0.7));
             };
         });
     }
 
+    // --- CRUD BUKU ---
     document.getElementById('coverFile').onchange = (e) => {
         if(!e.target.files[0]) return;
         const reader = new FileReader();
@@ -302,14 +311,11 @@
         reader.readAsDataURL(e.target.files[0]);
     };
 
-    // SIMPAN DATA
     window.saveData = () => {
         const judul = document.getElementById('judul').value;
         if(!judul) return alert("Judul wajib diisi!");
-
         const data = {
-            judul: judul,
-            penulis: document.getElementById('penulis').value || "-",
+            judul, penulis: document.getElementById('penulis').value || "-",
             penerbitTahun: document.getElementById('penerbitTahun').value || "-",
             genre: document.getElementById('genre').value || "Umum",
             callNumber: document.getElementById('callNumber').value || "-",
@@ -317,29 +323,18 @@
             sinopsis: document.getElementById('sinopsis').value || "",
             cover: document.getElementById('preview').dataset.img || ""
         };
-
         const btn = document.getElementById('btnSave');
-        btn.disabled = true;
-        btn.innerText = "Menyimpan...";
-
-        if(editId) {
-            update(ref(db, 'novels/' + editId), data).then(() => {
-                alert("Berhasil Update!");
-                resetForm();
-            }).finally(() => { btn.disabled = false; btn.innerText = "Simpan Data Novel"; });
-        } else {
-            push(ref(db, 'novels'), data).then(() => {
-                alert("Berhasil Simpan!");
-                resetForm();
-            }).finally(() => { btn.disabled = false; btn.innerText = "Simpan Data Novel"; });
-        }
+        btn.disabled = true; btn.innerText = "Menyimpan...";
+        const novelRef = editId ? ref(db, 'novels/' + editId) : push(ref(db, 'novels'));
+        (editId ? update : set)(novelRef, data).then(() => {
+            alert("Berhasil!"); resetForm();
+        }).finally(() => { btn.disabled = false; btn.innerText = "Simpan Data Novel"; });
     };
 
     onValue(ref(db, 'novels'), (snapshot) => {
         const data = snapshot.val();
         books = data ? Object.entries(data).map(([id, val]) => ({ id, ...val })) : [];
         render();
-        updateGenreDropdown();
     });
 
     window.render = () => {
@@ -348,13 +343,12 @@
         const res = document.getElementById('result');
         const adm = document.getElementById('adminList');
         if(!res || !adm) return;
-        
         res.innerHTML = ""; adm.innerHTML = "";
         books.forEach(b => {
             if((b.judul.toLowerCase().includes(q) || b.penulis.toLowerCase().includes(q)) && (g === "" || b.genre === g)) {
                 res.innerHTML += `
                     <div class="card">
-                        <img src="${b.cover || 'https://via.placeholder.com/200x300?text=Tanpa+Sampul'}">
+                        <img src="${b.cover || 'https://via.placeholder.com/200x300?text=No+Cover'}">
                         <div class="card-body">
                             <span class="badge">${b.genre}</span>
                             <div style="font-weight:bold; font-size:0.85rem; height:40px; overflow:hidden;">${b.judul}</div>
@@ -365,8 +359,8 @@
                     <div style="background:white; padding:10px; margin-bottom:8px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; border:1px solid #ddd;">
                         <div><b>${b.judul}</b></div>
                         <div>
-                            <button onclick="editData('${b.id}')" style="color:blue; background:none; border:none; cursor:pointer;"><i class="fas fa-edit"></i></button>
-                            <button onclick="deleteData('${b.id}')" style="color:red; background:none; border:none; cursor:pointer;"><i class="fas fa-trash"></i></button>
+                            <button onclick="editData('${b.id}')" style="color:blue; border:none; background:none; cursor:pointer;"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteData('${b.id}')" style="color:red; border:none; background:none; cursor:pointer;"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>`;
             }
@@ -377,58 +371,49 @@
         const b = books.find(i => i.id === id);
         document.getElementById('detailContent').innerHTML = `
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px; background:white; padding:20px; border-radius:15px;">
-                <img src="${b.cover || 'https://via.placeholder.com/200x300?text=Tanpa+Sampul'}" style="width:100%; border-radius:10px;">
+                <img src="${b.cover || 'https://via.placeholder.com/200x300?text=No+Cover'}" style="width:100%; border-radius:10px;">
                 <div>
                     <span class="badge">${b.genre}</span>
                     <h1 style="margin:10px 0;">${b.judul}</h1>
                     <p><b>Penulis:</b> ${b.penulis}</p>
-                    <p><b>Penerbit & Tahun:</b> ${b.penerbitTahun || '-'}</p>
-                    <p><b>Status:</b> <span class="status-info">Silahkan cek OPAC</span></p>
+                    <p><b>Status:</b> <span style="color:var(--warning); font-weight:bold;">Tersedia</span></p>
                     <hr>
                     <p>${b.sinopsis || 'Tidak ada sinopsis.'}</p>
                     <div class="location-box">
                         <h3 style="margin-top:0; color:var(--warning);"><i class="fas fa-map-marker-alt"></i> PANDUAN LOKASI RAK</h3>
                         <p>Nomor Panggil: <b>${b.callNumber}</b></p>
                         <p>Posisi: <b>${b.rak}</b></p>
-                        <small>*Gunakan nomor panggil di atas untuk mencari buku di rak fisik.</small>
+                        <button class="btn-main" onclick="openMap()" style="width:100%; justify-content:center; background:var(--warning); margin-top:10px;">
+                           <i class="fas fa-map-marked-alt"></i> Lihat Denah Ruangan
+                        </button>
                     </div>
                 </div>
             </div>`;
         showPage('detailPage');
     };
 
-    window.deleteData = (id) => { if(confirm("Hapus data ini?")) remove(ref(db, 'novels/' + id)); };
-    
+    window.deleteData = (id) => { if(confirm("Hapus?")) remove(ref(db, 'novels/' + id)); };
     window.editData = (id) => {
         const b = books.find(i => i.id === id);
         editId = id;
-        document.getElementById('formTitle').innerText = "Edit Data Novel";
         document.getElementById('judul').value = b.judul;
         document.getElementById('penulis').value = b.penulis;
-        document.getElementById('penerbitTahun').value = b.penerbitTahun || "";
         document.getElementById('genre').value = b.genre;
-        document.getElementById('callNumber').value = b.callNumber;
         document.getElementById('rak').value = b.rak;
-        document.getElementById('sinopsis').value = b.sinopsis;
-        
-        const preview = document.getElementById('preview');
-        preview.src = b.cover || "";
-        preview.style.display = b.cover ? "block" : "none";
-        preview.dataset.img = b.cover || "";
-        
+        document.getElementById('callNumber').value = b.callNumber;
+        document.getElementById('preview').src = b.cover;
+        document.getElementById('preview').style.display = "block";
+        document.getElementById('preview').dataset.img = b.cover;
         document.getElementById('btnCancel').style.display = "inline";
-        window.scrollTo(0,0);
     };
 
     window.resetForm = () => {
         editId = null;
-        document.getElementById('formTitle').innerText = "Tambah Data Novel";
-        ['judul','penulis','penerbitTahun','genre','callNumber','rak','sinopsis','coverFile'].forEach(id => {
-            if(document.getElementById(id)) document.getElementById(id).value = "";
+        ['judul','penulis','penerbitTahun','genre','callNumber','rak','sinopsis','coverFile'].forEach(i => {
+            if(document.getElementById(i)) document.getElementById(i).value = "";
         });
         document.getElementById('preview').style.display = "none";
         document.getElementById('preview').dataset.img = "";
-        document.getElementById('btnCancel').style.display = "none";
     };
 
     function updateGenreDropdown() {
@@ -440,6 +425,7 @@
     }
 
     window.onload = checkAuth;
+    window.onclick = (e) => { if(e.target == document.getElementById('mapModal')) closeMap(); };
 </script>
 </body>
 </html>
