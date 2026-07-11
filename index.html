@@ -227,7 +227,7 @@
     window.openMap = () => { document.getElementById('mapModal').style.display = 'flex'; };
     window.closeMap = () => { document.getElementById('mapModal').style.display = 'none'; };
 
-    // --- LOGIKA UPDATE DENAH (SAMA SEPERTI COVER) ---
+    // --- LOGIKA UPDATE DENAH ---
     document.getElementById('mapUpload').onchange = (e) => {
         if(!e.target.files[0]) return;
         const reader = new FileReader();
@@ -255,7 +255,6 @@
         }).finally(() => { btn.disabled = false; btn.innerText = "Simpan Denah Terbaru"; });
     };
 
-    // Ambil denah secara realtime
     onValue(ref(db, 'settings/map'), (snapshot) => {
         const mapData = snapshot.val();
         if(mapData) document.getElementById('mainMapImg').src = mapData;
@@ -280,152 +279,9 @@
         document.getElementById('adminPanel').style.display = isAuth ? "block" : "none";
     }
 
-    // --- COMPRESS IMAGE ---
     async function compressImage(base64) {
         return new Promise((resolve) => {
             const img = new Image();
             img.src = base64;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                const width = 800; // Resolusi denah lebih besar sedikit
-                const scale = width / img.width;
-                canvas.width = width;
-                canvas.height = img.height * scale;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                resolve(canvas.toDataURL('image/jpeg', 0.7));
-            };
-        });
-    }
-
-    // --- CRUD BUKU ---
-    document.getElementById('coverFile').onchange = (e) => {
-        if(!e.target.files[0]) return;
-        const reader = new FileReader();
-        reader.onload = async () => {
-            const compressed = await compressImage(reader.result);
-            document.getElementById('preview').src = compressed;
-            document.getElementById('preview').style.display = "block";
-            document.getElementById('preview').dataset.img = compressed;
-        };
-        reader.readAsDataURL(e.target.files[0]);
-    };
-
-    window.saveData = () => {
-        const judul = document.getElementById('judul').value;
-        if(!judul) return alert("Judul wajib diisi!");
-        const data = {
-            judul, penulis: document.getElementById('penulis').value || "-",
-            penerbitTahun: document.getElementById('penerbitTahun').value || "-",
-            genre: document.getElementById('genre').value || "Umum",
-            callNumber: document.getElementById('callNumber').value || "-",
-            rak: document.getElementById('rak').value || "-",
-            sinopsis: document.getElementById('sinopsis').value || "",
-            cover: document.getElementById('preview').dataset.img || ""
-        };
-        const btn = document.getElementById('btnSave');
-        btn.disabled = true; btn.innerText = "Menyimpan...";
-        const novelRef = editId ? ref(db, 'novels/' + editId) : push(ref(db, 'novels'));
-        (editId ? update : set)(novelRef, data).then(() => {
-            alert("Berhasil!"); resetForm();
-        }).finally(() => { btn.disabled = false; btn.innerText = "Simpan Data Novel"; });
-    };
-
-    onValue(ref(db, 'novels'), (snapshot) => {
-        const data = snapshot.val();
-        books = data ? Object.entries(data).map(([id, val]) => ({ id, ...val })) : [];
-        render();
-    });
-
-    window.render = () => {
-        const q = document.getElementById('search').value.toLowerCase();
-        const g = document.getElementById('filterGenre').value;
-        const res = document.getElementById('result');
-        const adm = document.getElementById('adminList');
-        if(!res || !adm) return;
-        res.innerHTML = ""; adm.innerHTML = "";
-        books.forEach(b => {
-            if((b.judul.toLowerCase().includes(q) || b.penulis.toLowerCase().includes(q)) && (g === "" || b.genre === g)) {
-                res.innerHTML += `
-                    <div class="card">
-                        <img src="${b.cover || 'https://via.placeholder.com/200x300?text=No+Cover'}">
-                        <div class="card-body">
-                            <span class="badge">${b.genre}</span>
-                            <div style="font-weight:bold; font-size:0.85rem; height:40px; overflow:hidden;">${b.judul}</div>
-                            <button class="btn-main" style="width:100%; font-size:0.75rem; padding:8px; justify-content:center; margin-top:10px;" onclick="showDetail('${b.id}')">Cek Lokasi</button>
-                        </div>
-                    </div>`;
-                adm.innerHTML += `
-                    <div style="background:white; padding:10px; margin-bottom:8px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; border:1px solid #ddd;">
-                        <div><b>${b.judul}</b></div>
-                        <div>
-                            <button onclick="editData('${b.id}')" style="color:blue; border:none; background:none; cursor:pointer;"><i class="fas fa-edit"></i></button>
-                            <button onclick="deleteData('${b.id}')" style="color:red; border:none; background:none; cursor:pointer;"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </div>`;
-            }
-        });
-    };
-
-    window.showDetail = (id) => {
-        const b = books.find(i => i.id === id);
-        document.getElementById('detailContent').innerHTML = `
-            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px; background:white; padding:20px; border-radius:15px;">
-                <img src="${b.cover || 'https://via.placeholder.com/200x300?text=No+Cover'}" style="width:100%; border-radius:10px;">
-                <div>
-                    <span class="badge">${b.genre}</span>
-                    <h1 style="margin:10px 0;">${b.judul}</h1>
-                    <p><b>Penulis:</b> ${b.penulis}</p>
-                    <p><b>Status:</b> <span style="color:var(--warning); font-weight:bold;">Tersedia</span></p>
-                    <hr>
-                    <p>${b.sinopsis || 'Tidak ada sinopsis.'}</p>
-                    <div class="location-box">
-                        <h3 style="margin-top:0; color:var(--warning);"><i class="fas fa-map-marker-alt"></i> PANDUAN LOKASI RAK</h3>
-                        <p>Nomor Panggil: <b>${b.callNumber}</b></p>
-                        <p>Posisi: <b>${b.rak}</b></p>
-                        <button class="btn-main" onclick="openMap()" style="width:100%; justify-content:center; background:var(--warning); margin-top:10px;">
-                           <i class="fas fa-map-marked-alt"></i> Lihat Denah Ruangan
-                        </button>
-                    </div>
-                </div>
-            </div>`;
-        showPage('detailPage');
-    };
-
-    window.deleteData = (id) => { if(confirm("Hapus?")) remove(ref(db, 'novels/' + id)); };
-    window.editData = (id) => {
-        const b = books.find(i => i.id === id);
-        editId = id;
-        document.getElementById('judul').value = b.judul;
-        document.getElementById('penulis').value = b.penulis;
-        document.getElementById('genre').value = b.genre;
-        document.getElementById('rak').value = b.rak;
-        document.getElementById('callNumber').value = b.callNumber;
-        document.getElementById('preview').src = b.cover;
-        document.getElementById('preview').style.display = "block";
-        document.getElementById('preview').dataset.img = b.cover;
-        document.getElementById('btnCancel').style.display = "inline";
-    };
-
-    window.resetForm = () => {
-        editId = null;
-        ['judul','penulis','penerbitTahun','genre','callNumber','rak','sinopsis','coverFile'].forEach(i => {
-            if(document.getElementById(i)) document.getElementById(i).value = "";
-        });
-        document.getElementById('preview').style.display = "none";
-        document.getElementById('preview').dataset.img = "";
-    };
-
-    function updateGenreDropdown() {
-        const select = document.getElementById('filterGenre');
-        if(!select) return;
-        const genres = [...new Set(books.map(b => b.genre))].filter(g => g);
-        select.innerHTML = '<option value="">Semua Genre</option>';
-        genres.forEach(g => select.innerHTML += `<option value="${g}">${g}</option>`);
-    }
-
-    window.onload = checkAuth;
-    window.onclick = (e) => { if(e.target == document.getElementById('mapModal')) closeMap(); };
-</script>
-</body>
-</html>
